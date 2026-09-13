@@ -1,31 +1,25 @@
-import { User } from "../models/user";
-import { AppError } from "../utils/AppError";
+import { userService } from "../services";
 import { asyncHandler } from "../utils/asyncHandler";
 
-export const getUsers = asyncHandler(async (_req, res) => {
-  const users = await User.find().select("-password");
+const getUsers = asyncHandler(async (req, res) => {
+  const users = await userService.getAllUsers();
   res.json({ success: true, data: users });
 });
 
-export const getMe = asyncHandler(async (req, res) => {
+const getMe = asyncHandler(async (req, res) => {
   res.json({ success: true, data: req.user });
 });
 
-export const createUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
-
-  if (!name || !email || !password) {
-    throw new AppError("Name, email, and password are required", 400);
-  }
-
-  const user = await User.create({ name, email, password, role });
+const createUser = asyncHandler(async (req, res) => {
+  const user = await userService.createUser(req.body);
   res.status(201).json({
     success: true,
-    data: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
+    data: user,
   });
 });
+
+export const userController = {
+  getUsers,
+  getMe,
+  createUser,
+};

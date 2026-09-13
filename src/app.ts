@@ -8,7 +8,7 @@ import morgan from "morgan";
 import { env, isProd } from "./config/env";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { globalLimiter } from "./middleware/rateLimiter";
-import apiRoutes from "./routes";
+import apiRoutes from "./routes/v1";
 
 const app = express();
 

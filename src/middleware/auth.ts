@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
-import { IJwtPayload, UserRole } from "../interfaces";
-import { User } from "../models/user";
+import { IJwtPayload } from "../interfaces";
+import { User } from "../models/user.model";
 import { AppError } from "../utils/AppError";
 import { asyncHandler } from "../utils/asyncHandler";
+import { UserRoleEnum } from "../enums";
 
 export const protect = asyncHandler(async (req, _res, next) => {
   const header = req.headers.authorization;
@@ -29,8 +30,8 @@ export const protect = asyncHandler(async (req, _res, next) => {
   }
 });
 
-export const authorize =
-  (...roles: UserRole[]) =>
+export const auth =
+  (...roles: UserRoleEnum[]) =>
   (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return next(new AppError("Forbidden. Insufficient permissions.", 403));

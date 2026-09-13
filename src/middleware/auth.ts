@@ -1,34 +1,28 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { env } from "../config/env";
-import { IJwtPayload } from "../interfaces";
-import { User } from "../models/user.model";
-import { AppError } from "../utils/AppError";
-import { asyncHandler } from "../utils/asyncHandler";
+import passport from "../config/passport";
 import { UserRoleEnum } from "../enums";
+import { AppError } from "../utils/AppError";
 
-export const protect = asyncHandler(async (req, _res, next) => {
-  const header = req.headers.authorization;
-  const token = header?.startsWith("Bearer ") ? header.slice(7) : undefined;
+export const protect = (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate(
+    "jwt",
+    { session: false },
+    (err: unknown, user: Express.User | false | undefined, info: unknown) => {
+      if (err) {
+        return next(err);
+      }
 
-  if (!token) {
-    throw new AppError("Not authorized. Token missing.", 401);
-  }
+      if (!user) {
+        return next(
+          new AppError("Not authorized. Invalid or expired token.", 401),
+        );
+      }
 
-  try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as IJwtPayload;
-    const user = await User.findById(decoded.id).select("-password");
-
-    if (!user) {
-      throw new AppError("Not authorized. User no longer exists.", 401);
-    }
-
-    req.user = user;
-    next();
-  } catch {
-    throw new AppError("Not authorized. Invalid or expired token.", 401);
-  }
-});
+      req.user = user;
+      next();
+    },
+  )(req, res, next);
+};
 
 export const auth =
   (...roles: UserRoleEnum[]) =>

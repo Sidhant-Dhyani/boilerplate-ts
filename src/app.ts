@@ -6,6 +6,7 @@ import helmet from "helmet";
 import hpp from "hpp";
 import morgan from "morgan";
 import { env, isProd } from "./config/env";
+import passport from "./config/passport";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { globalLimiter } from "./middleware/rateLimiter";
 import apiRoutes from "./routes/v1";
@@ -31,6 +32,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 app.use(hpp());
+app.use(passport.initialize());
 app.use(morgan(isProd ? "combined" : "dev"));
 app.use(globalLimiter);
 
